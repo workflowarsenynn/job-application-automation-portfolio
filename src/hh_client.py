@@ -23,6 +23,44 @@ class JobBoardClient:
         self.session = requests.Session()
         self.logger = logger or logging_utils.get_logger(__name__)
 
+    def _fake_vacancies(self, profile: SearchProfile) -> List[Vacancy]:
+        """Return a small synthetic list of vacancies for offline demo mode."""
+        area = profile.areas[0] if profile.areas else "remote"
+        base_salary = profile.salary_min or 150000
+        demo_items: List[Vacancy] = []
+        for idx in range(1, 4):
+            salary_from = base_salary + (idx - 1) * 10000
+            salary_to = salary_from + 20000
+            demo_items.append(
+                Vacancy(
+                    id=f"demo-{idx}",
+                    title=f"{profile.name} (Demo Vacancy #{idx})",
+                    company_name="Demo Company",
+                    area=area,
+                    salary_from=salary_from,
+                    salary_to=salary_to,
+                    description=(
+                        f"This is a demo vacancy for profile '{profile.query}'. "
+                        "Used in offline dry-run mode without hitting the API."
+                    ),
+                    url=f"https://example.com/demo-vacancies/demo-{idx}",
+                )
+            )
+        return demo_items
+
+    def _fake_vacancy_details(self, vacancy_id: str) -> Vacancy:
+        """Create a deterministic fake vacancy detail record."""
+        return Vacancy(
+            id=vacancy_id,
+            title=f"Demo Vacancy {vacancy_id}",
+            company_name="Demo Company",
+            area="remote",
+            salary_from=180000,
+            salary_to=210000,
+            description="Offline demo vacancy details. No network request was made.",
+            url=f"https://example.com/demo-vacancies/{vacancy_id}",
+        )
+
     def _headers(self) -> Dict[str, str]:
         headers = {"Accept": "application/json"}
         if self.settings.JOB_BOARD_ACCESS_TOKEN:
@@ -40,6 +78,10 @@ class JobBoardClient:
 
     def search_vacancies(self, profile: SearchProfile) -> List[Vacancy]:
         """Search vacancies using profile parameters."""
+        if self.settings.DRY_RUN:
+            self.logger.info("Using offline demo vacancies for profile %s", profile.name)
+            return self._fake_vacancies(profile)
+
         params: Dict[str, Any] = {
             "text": profile.query,
             "page": 0,
@@ -57,18 +99,21 @@ class JobBoardClient:
 
     def get_vacancy_details(self, vacancy_id: str) -> Vacancy:
         """Fetch a single vacancy and return it as a model."""
+        if self.settings.DRY_RUN:
+            self.logger.info("Returning offline demo vacancy details for %s", vacancy_id)
+            return self._fake_vacancy_details(vacancy_id)
+
         response = self._request("GET", f"/vacancies/{vacancy_id}")
         return Vacancy.from_api(response.json())
 
     def apply_to_vacancy(self, vacancy: Vacancy, cover_letter: str, dry_run: bool = True) -> Dict[str, Any]:
         """Apply to a vacancy or return a dry-run payload."""
-        if dry_run:
+        if dry_run or self.settings.DRY_RUN:
             self.logger.info("Dry-run apply to vacancy %s", vacancy.id)
             return {
                 "status": "dry_run",
                 "vacancy_id": vacancy.id,
-                "message": "Dry-run mode; request not sent",
-                "cover_letter_preview": cover_letter[:120],
+                "message_preview": cover_letter[:160],
             }
 
         payload = {"vacancy_id": vacancy.id, "message": cover_letter}
