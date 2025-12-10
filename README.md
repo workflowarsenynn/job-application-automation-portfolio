@@ -1,5 +1,17 @@
 # Job Application Automation (Demo)
 
+## Highlights
+
+- Integration with a job-board API (demo mode, no real platform secrets).
+- SQLite-based application logging.
+- OpenAI-powered cover letters (with deterministic dry-run mode).
+- Typed models and basic tests (pytest).
+- Offline demo mode: uses synthetic vacancies instead of real API calls when `DRY_RUN` is enabled.
+
+## Screenshots
+
+![Demo run of the CLI workflow](docs/demo_run.png)
+
 A public, security-safe demo of a job-board auto-apply bot. The real production system targets a Russian job-board API and powers automated searches, vacancy enrichment, OpenAI-generated cover letters, and SQLite logging. This repository mirrors the architecture and developer experience while removing sensitive logic and data.
 
 ## Architecture
@@ -36,8 +48,9 @@ A public, security-safe demo of a job-board auto-apply bot. The real production 
 
 ## Demo scenario
 - Two search profiles are enabled (`backend_python`, `data_engineer`) with a small application limit.
-- Vacancies are requested from the abstract job-board API, filtered by salary, area, and description presence.
-- Full vacancy details are fetched individually, and a cover letter is generated per vacancy.
+- When `dry_run` is enabled (default), vacancies come from the built-in offline demo generator and no HTTP calls are made to the abstract job-board API.
+- In full mode (`DRY_RUN=false`), the client can talk to a real job-board API at the same endpoints (`/vacancies`, `/vacancies/{id}`, `/responses`) if you point `JOB_BOARD_API_BASE_URL` to a real host.
+- Full vacancy details are fetched individually (offline or via API), and a cover letter is generated per vacancy.
 - In `dry_run` mode the OpenAI client returns a deterministic stub and no API calls are sent to `/responses`.
 - Each attempt is logged into SQLite with a snippet of the cover letter.
 - A synthetic log excerpt illustrating the flow is available in `docs/LOG_EXAMPLE.md`.
