@@ -1,0 +1,40 @@
+{
+  "profiles": [
+    {
+      "id": "backend_python",
+      "name": "Backend Python",
+      "query": "python backend developer",
+      "salary_min": 180000,
+      "areas": ["remote", "moscow"],
+      "candidate_profile": {
+        "skills": "Python, FastAPI, PostgreSQL, async programming",
+        "experience": "5+ years building web services and integrations",
+        "location": "Remote or Moscow"
+      }
+    },
+    {
+      "id": "data_engineer",
+      "name": "Data Engineer",
+      "query": "data engineer airflow",
+      "salary_min": 200000,
+      "areas": ["remote", "saint-petersburg"],
+      "candidate_profile": {
+        "skills": "Python, Airflow, ETL design, cloud data warehouses",
+        "experience": "Designed pipelines moving product analytics data at scale",
+        "location": "Remote-first"
+      }
+    },
+    {
+      "id": "mlops",
+      "name": "MLOps",
+      "query": "mlops engineer",
+      "salary_min": 220000,
+      "areas": ["remote"],
+      "candidate_profile": {
+        "skills": "MLOps, CI/CD for ML, monitoring, model serving",
+        "experience": "Maintained production ML systems with modern observability",
+        "location": "Remote"
+      }
+    }
+  ]
+}

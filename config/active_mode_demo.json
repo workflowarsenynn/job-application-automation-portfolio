@@ -1,0 +1,7 @@
+{
+  "name": "demo_default",
+  "active_profiles": ["backend_python", "data_engineer"],
+  "max_applications": 3,
+  "send_applications": false,
+  "dry_run": true
+}
